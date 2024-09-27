@@ -1,0 +1,79 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "flask_project",
+    "collectionId": "76460dc3-40f9-4908-8978-868674e3f57c",
+    "dateExported": "2024-09-25T02:36:08.569Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "7c40f931-c60d-4610-906b-afd6673c5fc8",
+            "colId": "76460dc3-40f9-4908-8978-868674e3f57c",
+            "containerId": "",
+            "name": "predict-flood",
+            "url": "https://authappflack.pythonanywhere.com//predict-flood",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-09-25T01:29:30.749Z",
+            "modified": "2024-09-25T02:30:22.694Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"youssef\",\n  \"data\": \"this is the data\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "d790937a-6956-4003-b532-9e9b6bd57990",
+            "colId": "76460dc3-40f9-4908-8978-868674e3f57c",
+            "containerId": "",
+            "name": "predict-drought",
+            "url": "https://authappflack.pythonanywhere.com/predict-drought",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-09-25T01:30:01.496Z",
+            "modified": "2024-09-25T02:30:38.679Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"youssef\",\n  \"data\": \"this is the data\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "a5c4e357-e252-491c-9b56-c1146d3016a2",
+            "colId": "76460dc3-40f9-4908-8978-868674e3f57c",
+            "containerId": "",
+            "name": "predict-air-quality",
+            "url": "https://authappflack.pythonanywhere.com/predict-air-quality",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2024-09-25T01:30:41.368Z",
+            "modified": "2024-09-25T02:31:34.445Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"youssef\",\n  \"data\": \"this is the data\"\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "8a5feb17-20ec-4a43-a949-46e025d76ae0",
+            "colId": "76460dc3-40f9-4908-8978-868674e3f57c",
+            "containerId": "",
+            "name": "predict-vegetation",
+            "url": "https://authappflack.pythonanywhere.com/predict-vegetation",
+            "method": "POST",
+            "sortNum": 40000,
+            "created": "2024-09-25T01:31:21.831Z",
+            "modified": "2024-09-25T02:31:42.219Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"youssef\",\n  \"data\": \"this is the data\"\n}",
+                "form": []
+            }
+        }
+    ],
+    "ref": "h7n-uxlo3WtdTCCevsKL7SwTHkaI-9nijaqChEFJXf98QcvBQ5uVu-_rvnwRtwMqRS0-c2b7K4uGU-17d7cy9A"
+}
