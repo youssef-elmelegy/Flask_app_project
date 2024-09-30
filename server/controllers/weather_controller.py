@@ -2,6 +2,12 @@ from flask import request, jsonify, make_response
 import random
 from dotenv import load_dotenv
 
+import numpy as np
+import tensorflow as tf
+from PIL import Image
+import io
+import base64
+
 load_dotenv()
 
 def predict_flood():
@@ -44,7 +50,7 @@ def predict_drought():
             "response": {
                 "name": name,
                 "data": input_data,
-                "random_number": random.randint(1, 100),  # Fixed randint call
+                "random_number": random.randint(1, 100),  
             }
         }), 201)
         
@@ -54,20 +60,50 @@ def predict_drought():
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred"}), 500
 
+
+import pickle
+
+
+def prediction(date):
+    try:
+        
+        with open('server/controllers/comp_model.pkl', 'rb') as file:
+            model = pickle.load(file)
+        
+        # predictions = model.forecast(steps=4)
+        predictions = model.predict(date)
+        return predictions
+    except Exception as e:
+        print(f"Error during prediction: {e}")
+        raise  
+
+try:
+    temp = prediction(date)
+    print(f"Temp output from direct prediction: {temp}")
+except Exception as e:
+    print(f"Direct test error: {e}")
+
 def predict_air_quality():
-    return jsonify({"success": True, "message": "Air quality predicted successfully!"})
+    try:
+        date = request.json.get('date')
+        if not date:
+            return jsonify({"error": "Date is required"}), 400
+        
+        predictions = prediction(date)  
+        
+        predictions_dict = {str(k): v for k, v in predictions.items()}
+        
+        
+        return jsonify({'response': predictions_dict})
+    except Exception as e:
+        print(f"Error in route: {str(e)}")
+        return jsonify({"error": str(e)}), 400
 
 
 
 
-import numpy as np
-import tensorflow as tf
-from PIL import Image
-import io
-import base64
 
-
-# # Load the Keras model (H5 model)
+# Load the Keras model (H5 model)
 model = tf.keras.models.load_model('server/controllers/mobilenetv2_crop_disease.h5')
 
 class_labels = ['Cassava Bacterial Blight (CBB)',
@@ -79,7 +115,7 @@ class_labels = ['Cassava Bacterial Blight (CBB)',
 
 def preprocess_image(image_file):
     
-    img = Image.open(image_file).convert('L')  # Convert to grayscale (L mode)
+    img = Image.open(image_file).convert('L')
     
     img = img.resize((128, 128))
     
@@ -94,14 +130,6 @@ def preprocess_image(image_file):
 
 def predict_vegetation():
     try:
-        # data = request.get_json()
-         
-        # image_data = data['data']
-         
-        # # Decode the base64 image
-        # image_bytes = base64.b64decode(image_data)
-        # image = io.BytesIO(image_bytes)  # Convert bytes to a file-like object
-        
         image = request.files.get('fileup')
 
         preprocessed_image = preprocess_image(image)
@@ -117,6 +145,3 @@ def predict_vegetation():
     except Exception as e:
         return jsonify({'error': str(e)})
 
-# # Predict Vegetation Function
-# def predict_vegetation():
-#     return jsonify({"success": True, "message": "Vegetation health predicted successfully!"})
