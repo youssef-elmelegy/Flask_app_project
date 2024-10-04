@@ -45,54 +45,48 @@ def predict_flood():
         return jsonify({"error": "An unexpected error occurred"}), 500
 
 
-
-
 def prediction_drought(date):
     try:
-        
         with open('server/controllers/Drought_model.pkl', 'rb') as file:
             model = pickle.load(file)
         
         predictions = model.forecast(steps=1)
-        # predictions = model.predict(date)
+        
         return predictions
+
     except Exception as e:
         print(f"Error during prediction: {e}")
-        raise  
+        raise
 
+def drought_csv(date, dsci_value):
+    """Append new drought prediction data to the CSV file."""
+    dsci_value_formatted = "{:.3f}".format(dsci_value)
 
-# def predict_air_quality():
-#     try:
-#         date = request.json.get('date')
-#         if not date:
-#             return jsonify({"error": "Date is required"}), 400
-        
-#         predictions = prediction(date)  
-        
-#         predictions_dict = {str(k): v for k, v in predictions.items()}
-        
-        
-#         return jsonify({'response': predictions_dict})
-#     except Exception as e:
-#         print(f"Error in route: {str(e)}")
-#         return jsonify({"error": str(e)}), 400
+    with open('./server/controllers/Drought.csv', 'a') as f:
+        f.write(f"{date},{dsci_value_formatted}\n") 
 
 def predict_drought():
     try:
-        # date = request.json.get('date')
-        # if not date:
-        #     return jsonify({"error": "Date is required"}), 400
+
         date = 12
         predictions = prediction_drought(date)  
         
         predictions_dict = {str(k): v for k, v in predictions.items()}
         
+        df = pd.read_csv('./server/controllers/Drought.csv', parse_dates=['Date'])
+
+        last_10_dsci_records = df[['Date']].tail(10).to_dict(orient='records')
+
+        response = make_response(jsonify({
+            "success": True,
+            "Predicted": predictions_dict,
+            "data": last_10_dsci_records
+        }), 200)
         
-        return jsonify({'response': predictions_dict})
+        return response
     except Exception as e:
         print(f"Error in route: {str(e)}")
         return jsonify({"error": str(e)}), 400
-
 
 
 
@@ -251,7 +245,7 @@ def predict_soil():
         value = helper()
 
         df = pd.read_csv('./server/controllers/specific_region_data.csv', parse_dates=['Date'])
-        last_100_soil_moisture = df[['Soil_Moisture']].tail(100).to_dict(orient='records')
+        last_100_soil_moisture = df[['Soil_Moisture']].tail(10).to_dict(orient='records')
         
         response = make_response(jsonify({
             "success": True,
@@ -282,14 +276,33 @@ def prediction(date):
         print(f"Error during prediction: {e}")
         raise  
 
-try:
-    temp = prediction(date)
-    print(f"Temp output from direct prediction: {temp}")
-except Exception as e:
-    print(f"Direct test error: {e}")
+# try:
+#     temp = prediction(date)
+#     print(f"Temp output from direct prediction: {temp}")
+# except Exception as e:
+#     print(f"Direct test error: {e}")
+
+def air_csv(data):
+    
+    df = pd.read_csv('server/controllers/air-quality.csv')
+    
+    
+    
+    new_date = datetime.today().strftime('%Y-%m-%d')
+    PM2 = (list(data.values())[0])
+    
+    # Create the new row as a dictionary
+    new_row = {'Date': new_date, 'PM2': PM2}
+    
+    new_row_df = pd.DataFrame([new_row])
+    
+    df = pd.concat([df[1:], new_row_df], ignore_index=True) 
+    
+    df.to_csv('server/controllers/air-quality.csv', index=False)
 
 def predict_air_quality():
     try:
+        
         date = request.json.get('date')
         if not date:
             return jsonify({"error": "Date is required"}), 400
@@ -298,8 +311,28 @@ def predict_air_quality():
         
         predictions_dict = {str(k): v for k, v in predictions.items()}
         
+        df = pd.read_csv('./server/controllers/air-quality.csv', parse_dates=['Date'])
+    
+        df['Date'] = df['Date'].dt.date
+
+        today_date = datetime.today().date()  
+        print(f"Checking for date: {today_date}")
+
+        if not (today_date in df['Date'].values):
+            air_csv(predictions_dict)
+            
+            
+        last_100_soil_moisture = df[['PM2']].tail(10).to_dict(orient='records')
         
-        return jsonify({'response': predictions_dict})
+        response = make_response(jsonify({
+            "success": True,
+            "Predicted": predictions_dict,
+            "data": last_100_soil_moisture
+        }), 201)
+        
+        return response
+        
+        # return jsonify({'response': predictions_dict})
     except Exception as e:
         print(f"Error in route: {str(e)}")
         return jsonify({"error": str(e)}), 400
