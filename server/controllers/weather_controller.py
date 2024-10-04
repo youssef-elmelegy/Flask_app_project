@@ -251,7 +251,7 @@ def predict_soil():
         value = helper()
 
         df = pd.read_csv('./server/controllers/specific_region_data.csv', parse_dates=['Date'])
-        last_100_soil_moisture = df[['Soil_Moisture']].tail(20).to_dict(orient='records')
+        last_100_soil_moisture = df[['Soil_Moisture']].tail(10).to_dict(orient='records')
         
         response = make_response(jsonify({
             "success": True,
