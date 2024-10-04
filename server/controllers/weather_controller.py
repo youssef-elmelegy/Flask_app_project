@@ -194,24 +194,34 @@ def postprocess_output(prediction, scaler, features=['Soil_Moisture', 'sin_day',
     return float(soil_moisture[0])
 
 def helper():
-    df = pd.read_csv('./server/controllers/specific_region_data.csv', parse_dates=['Date'])
-    
-    df['Date'] = df['Date'].dt.date
-
-    today_date = datetime.today().date()  
-    print(f"Checking for date: {today_date}")
-
-    if today_date in df['Date'].values:
-        
-        existing_soil_moisture = df.loc[df['Date'] == today_date, 'Soil_Moisture'].values[0]
-        return existing_soil_moisture
-    
-    
-    scaler = joblib.load('./server/controllers/scaler.joblib')
-
-    model = load_model('./server/controllers/Soil_m_1.h5')
-
     try:
+        df = pd.read_csv('./server/controllers/specific_region_data.csv')
+        
+        
+
+        if 'Date' in df.columns:
+            df['Date'] = pd.to_datetime(df['Date'], errors='coerce')  
+            df = df.dropna(subset=['Date'])
+            df['Date'] = df['Date'].dt.date  
+        else:
+            print("Date column not found in the DataFrame.")
+            return None
+
+        # print(2)
+        today_date = datetime.today().date()
+        # print(f"Checking for date: {today_date}")
+
+        if today_date in df['Date'].values:
+            existing_soil_moisture = df.loc[df['Date'] == today_date, 'Soil_Moisture'].values[0]
+            return existing_soil_moisture
+
+        scaler = joblib.load('./server/controllers/scaler.joblib')
+        model = load_model('./server/controllers/Soil_m_1.h5')
+
+        if df.empty:
+            print("The DataFrame is empty after date conversion.")
+            return None
+
         processed_input = preprocess_input(
             new_data=df,
             scaler=scaler,
@@ -219,24 +229,26 @@ def helper():
             features=['Soil_Moisture', 'sin_day', 'cos_day', 'month'],
             date_format='%Y-%m-%d'
         )
-        
+
         raw_prediction = model.predict(processed_input)
-        
+
         actual_soil_moisture = postprocess_output(
             prediction=raw_prediction,
             scaler=scaler,
             features=['Soil_Moisture', 'sin_day', 'cos_day', 'month']
         )
-        
+
         print(f"Predicted Soil Moisture for the next day: {actual_soil_moisture:.4f}")
-        
+
         csv_file_path = './server/controllers/specific_region_data.csv'
         update_csv(csv_file_path, actual_soil_moisture)
-        
+
         return actual_soil_moisture
-    
+
     except Exception as e:
-        print(f"An error occurred during prediction: {e}")
+        print(f"An error occurred in helper function: {e}")
+        print(traceback.format_exc())  # Print the full traceback
+        return None
     
 
 def predict_soil():
