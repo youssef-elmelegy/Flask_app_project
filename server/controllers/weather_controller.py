@@ -15,6 +15,8 @@ from tensorflow.keras.models import load_model
 from datetime import datetime
 import random
 
+import pickle
+
 load_dotenv()
 
 def predict_flood():
@@ -41,6 +43,55 @@ def predict_flood():
         return jsonify({"success": False, "message": str(e)}), 400
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred"}), 500
+
+
+
+
+def prediction_drought(date):
+    try:
+        
+        with open('server/controllers/Drought_model.pkl', 'rb') as file:
+            model = pickle.load(file)
+        
+        predictions = model.forecast(steps=1)
+        # predictions = model.predict(date)
+        return predictions
+    except Exception as e:
+        print(f"Error during prediction: {e}")
+        raise  
+
+
+# def predict_air_quality():
+#     try:
+#         date = request.json.get('date')
+#         if not date:
+#             return jsonify({"error": "Date is required"}), 400
+        
+#         predictions = prediction(date)  
+        
+#         predictions_dict = {str(k): v for k, v in predictions.items()}
+        
+        
+#         return jsonify({'response': predictions_dict})
+#     except Exception as e:
+#         print(f"Error in route: {str(e)}")
+#         return jsonify({"error": str(e)}), 400
+
+def predict_drought():
+    try:
+        # date = request.json.get('date')
+        # if not date:
+        #     return jsonify({"error": "Date is required"}), 400
+        date = 12
+        predictions = prediction_drought(date)  
+        
+        predictions_dict = {str(k): v for k, v in predictions.items()}
+        
+        
+        return jsonify({'response': predictions_dict})
+    except Exception as e:
+        print(f"Error in route: {str(e)}")
+        return jsonify({"error": str(e)}), 400
 
 
 
@@ -194,7 +245,7 @@ def helper():
         print(f"An error occurred during prediction: {e}")
     
 
-def predict_drought():
+def predict_soil():
     try:
 
         value = helper()
@@ -216,8 +267,6 @@ def predict_drought():
     except Exception as e:
         return jsonify({"error": "An unexpected error occurred"}), 500
 
-
-import pickle
 
 
 def prediction(date):
